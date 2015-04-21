@@ -35,17 +35,79 @@ def me(angel_h):
      for skill in me_result['skills']:
          skill_info[skill['id']] = skill['name']
          #skill_info[skill['id']]['level'] = '3' #skill['level']
+     # TODO: build levels as nested dic/JSON
 
      # grab levels
      for level in me_result['skills']:
          level_info[level['id']] = level['level']
 
      return user_info, skill_info, level_info
-#me = me()
+
+#pprint(me(al))
+
+user_info, skill_info, level_info = me(al)
+#print skill_info.keys()
+#sys.exit(33)
+
+def job_search_by_location(angel_h,location_id,job_type):
+    jobs_result = {}
+    job_list = []
+    jobs = angel_h.get_tag_jobs(location_id)
+    for job in jobs['jobs']:
+        #print job['startup']['name']
+        #if job['job_type'] == job_type and job[]
+        for tag in job['tags']:
+            #print tag['display_name']
+            for skill_key in skill_info.keys():
+                #print skill_key
+                if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys():
+                   # print tag['display_name']
+                    temp_job = {'title': job['title'],
+                                'job': job['angellist_url'],
+                                'startup':job['startup']['name'],
+                                'quality':job['startup']['quality'],
+                                'startup_min':job['salary_min'],
+                                'startup_max':job['salary_max']}
+
+                    #temp_job.extend([job['title'],job['angellist_url']])
+                    jobs_result[job['id']] = temp_job
+                    #print temp_job
+                    #if not tag['display_name'] in job_list: job_list.append(job)
+                    #print json.dumps(job_list)
+                    #sys.exit(333)
+            #sys.exit(333)
+    #print json.dumps(jobs_result)
+    return jobs_result
 
 
+def pagination(obj_handler,id):
+    results = {}
+    page = obj_handler.get_tag_jobs(id)
+    num = 1
+    print page['last_page']
+   # sys.exit(44)
+    last = page['last_page']
+    while page['page'] != 2: #page['last_page']:
+        job_results = obj_handler.get_tag_jobs(id, page = num)
+        for res in job_results['jobs']:
+            print res
 
-pprint(me(al))
+            sys.exit(55)
+        num = num + 1
+
+        #print results['jobs']['title']
+        #print results['page']
+
+pagination(al,1692)
+
+sys.exit(33)
+#pprint(job_search_by_location(al,1629,"full-time"))
+
+##page = al.get_tag_jobs(1692,page=3)
+#print page['last_page']
+#print page['page']
+
+#pprint(me(al))
 
 
 
