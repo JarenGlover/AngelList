@@ -54,16 +54,20 @@ def pagination(method,id):
     results = []
 
     final_results = {}
-    current_page = 1
-    job_results = {}
+    # TODO see note
     set_env =method(id)
+    final_results = set_env
+    last_page = set_env['last_page']
+    current_page = 68    #needs to be set to to two
+    job_results = {}
+
     #print job_results['last_page']
     # sys.exit(44)
     #last = job_results['last_page']
-    last_page = set_env['last_page']
+
     #last_page = 1000000000
     #while job_results['page'] != 2: #page['last_page']:
-    while current_page <= last_page: #page['last_page']:
+    while current_page < last_page: #page['last_page']:
         #job_results = request.get_tag_jobs(id, page = num)
         job_results = method(id,page=current_page)
         last_page = job_results['last_page']
@@ -73,9 +77,11 @@ def pagination(method,id):
             #final_results[current_page] = res
             break
         '''
-        return job_results
+        #print json.dumps(job_results)
+        #sys.exit(33)
 
-        break
+        #break
+        final_results['jobs'].append(job_results)
         current_page = current_page + 1
         #print "------------------------------"
         #print results['jobs']['title']
@@ -83,7 +89,7 @@ def pagination(method,id):
     #print len(results)
     #final_results['jobs'] = results
     #return json.dumps(final_results)
-    return json.dumps(results)
+    return json.dumps(final_results)
 
 
 def job_search_by_location(angel_h,location_id,job_type):
@@ -91,8 +97,8 @@ def job_search_by_location(angel_h,location_id,job_type):
     job_list = []
     api = angel_h.get_tag_jobs
     jobs = pagination(api,location_id)
-    #print jobs
-    #sys.exit(555)
+    print jobs
+    sys.exit(555)
     #jobs = angel_h.get_tag_jobs(location_id)
     for job in jobs['jobs']:
         #print job['startup']['name']
@@ -124,7 +130,7 @@ def job_search_by_location(angel_h,location_id,job_type):
 
 
 
-pprint(job_search_by_location(al,1629,"full-time"))
+pprint(job_search_by_location(al,1692,"full-time"))
 sys.exit(33)
 
 
