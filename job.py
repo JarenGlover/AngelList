@@ -80,25 +80,45 @@ def job_search_by_location(angel_h,location_id,job_type):
     return jobs_result
 
 
-def pagination(obj_handler,id):
-    results = {}
-    page = obj_handler.get_tag_jobs(id)
-    num = 1
-    print page['last_page']
-   # sys.exit(44)
-    last = page['last_page']
-    while page['page'] != 2: #page['last_page']:
-        job_results = obj_handler.get_tag_jobs(id, page = num)
+page = al.get_tag_jobs
+#page = al.get_tag_jobs(1692)
+
+#args = [1953,"jaren"]
+
+#def test (meth,*args):
+    #print meth(1692)
+    #print args[1]
+    #print args
+
+#test(args)
+#sys.exit(33)
+
+def pagination(method,id):
+
+    results = []
+    current_page = 1
+    job_results = {} #method(id)
+    #print job_results['last_page']
+    # sys.exit(44)
+    #last = job_results['last_page']
+    last_page = 0
+    #while job_results['page'] != 2: #page['last_page']:
+    while current_page != last_page: #page['last_page']:
+        #job_results = request.get_tag_jobs(id, page = num)
+        job_results = method(id,page=current_page)
+        last_page = job_results['last_page']
         for res in job_results['jobs']:
-            print res
+            print json.dumps(res['title'])
+            results.append(res)
 
-            sys.exit(55)
-        num = num + 1
-
+        current_page = current_page + 1
+        print "------------------------------"
         #print results['jobs']['title']
         #print results['page']
+    print len(results)
 
-pagination(al,1692)
+
+pagination(page,1692)
 
 sys.exit(33)
 #pprint(job_search_by_location(al,1629,"full-time"))
