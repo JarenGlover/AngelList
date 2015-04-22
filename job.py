@@ -58,7 +58,7 @@ def pagination(method,id):
     set_env =method(id)
     final_results = set_env
     last_page = set_env['last_page']
-    current_page = 68    #needs to be set to to two
+    current_page = 1    #needs to be set to to two
     job_results = {}
 
     #print job_results['last_page']
@@ -81,7 +81,23 @@ def pagination(method,id):
         #sys.exit(33)
 
         #break
-        final_results['jobs'].append(job_results)
+        #print type(job_results)
+
+        #print json.dumps(dict(job_results,**final_results))
+        #jaren = {}
+        #print json.dumps(final_results['jobs'])
+        #print json.dumps(job_results['jobs'])
+        output = final_results['jobs'] + job_results['jobs']
+        final_results['jobs'] = output
+        #print json.dumps(final_results)
+
+        # jaren = final_results['jobs'].update(job_results['jobs'])
+        #print json.dumps(jaren)
+        #sys.exit(333)
+
+        #final_results['jobs'].append(job_results)
+
+
         current_page = current_page + 1
         #print "------------------------------"
         #print results['jobs']['title']
@@ -89,7 +105,8 @@ def pagination(method,id):
     #print len(results)
     #final_results['jobs'] = results
     #return json.dumps(final_results)
-    return json.dumps(final_results)
+    return final_results
+    #return json.dumps(JAREN)
 
 
 def job_search_by_location(angel_h,location_id,job_type):
@@ -97,8 +114,9 @@ def job_search_by_location(angel_h,location_id,job_type):
     job_list = []
     api = angel_h.get_tag_jobs
     jobs = pagination(api,location_id)
-    print jobs
-    sys.exit(555)
+    #print json.dumpjobs)
+
+    #sys.exit(555)
     #jobs = angel_h.get_tag_jobs(location_id)
     for job in jobs['jobs']:
         #print job['startup']['name']
@@ -107,14 +125,18 @@ def job_search_by_location(angel_h,location_id,job_type):
             #print tag['display_name']
             for skill_key in skill_info.keys():
                 #print skill_key
-                if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys():
+                if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys()\
+                        and job['startup']['quality'] > 6:
                    # print tag['display_name']
                     temp_job = {'title': job['title'],
                                 'job': job['angellist_url'],
                                 'startup':job['startup']['name'],
                                 'quality':job['startup']['quality'],
                                 'startup_min':job['salary_min'],
-                                'startup_max':job['salary_max']}
+                                'startup_max':job['salary_max'],
+                                'equity_min':job['equity_min'],
+                                'equity_cliff':job['equity_cliff'],
+                                'currency_code':job['currency_code']}
 
                     #temp_job.extend([job['title'],job['angellist_url']])
                     jobs_result[job['id']] = temp_job
