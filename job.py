@@ -12,7 +12,7 @@ sys.path.append('/Users/Glove/Desktop/lob/angel-list/angel')
 
 
 import angel
-
+JOB_TYPE = 'full-time'
 al = angel.AngelList(s.CLIENT_ID, s.CLIENT_SECRET, s.ACCESS_TOKEN)
 #print al
 
@@ -45,7 +45,13 @@ def me(angel_h):
 
 #pprint(me(al))
 
-user_info, skill_info, level_info = me(al)
+LOCATION_INFO, skill_info, level_info = me(al)
+
+test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
+
+# {1629: u'Cincinnati', 1782: u'United Kingdom', 2029: u'Shanghai'}  1692
+
+#print LOCATION_INFO.keys()
 #print skill_info.keys()
 #sys.exit(33)
 
@@ -58,7 +64,7 @@ def pagination(method,id):
     set_env =method(id)
     final_results = set_env
     last_page = set_env['last_page']
-    current_page = 66    #needs to be set to to two
+    current_page = 0    #needs to be set to to two
     job_results = {}
 
     #print job_results['last_page']
@@ -108,9 +114,17 @@ def pagination(method,id):
     return final_results
     #return json.dumps(JAREN)
 
+def get_all_jobs(angel_h,locations):
+    jobs = []
+    for location_id in LOCATION_INFO:
+        temp_jobs = job_search_by_location(angel_h,location_id,JOB_TYPE)
+        jobs = jobs + temp_jobs
+    print json.dumps(jobs)
+    return len(jobs)
+
 
 def job_search_by_location(angel_h,location_id,job_type):
-    jobs_result = {}
+    jobs_result = {}   #might need to remove ?
     output =[]
     job_list = []
     api = angel_h.get_tag_jobs
@@ -150,19 +164,23 @@ def job_search_by_location(angel_h,location_id,job_type):
                     #jobs_result[job['id']] = temp_job
 
                     output.append(temp_job)
-                    jobs_result['job_id'] = output
+                    #jobs_result['jobs_by_location'] = output
 
                     #jobs_result['job_id'] = temp_job
-
+    jobs_result['jobs_by_location'] = output   # REMOVE THIS?
                     #print temp_job
                     #if not tag['display_name'] in job_list: job_list.append(job)
                     #print json.dumps(job_list)
                     #sys.exit(333)
             #sys.exit(333)
     #print json.dumps(jobs_result)
-    return jobs_result
+    return output  # rename output?
+    #return len(jobs_result['jobs_by_location'])
 
 
+
+pprint(get_all_jobs(al,test_location_info))
+sys.exit(5)
 
 def stats(jobs):
     output = []
@@ -175,7 +193,7 @@ def stats(jobs):
     #print json.dumps(jobs)
     #print
     #sys.exit(33)
-    for job in jobs['job_id']:
+    for job in jobs['jobs_by_location']:  # << change this
         #print json.dumps(job)
         #sys.exit(33)
         #print json.dumps(job)
@@ -213,7 +231,8 @@ def stats(jobs):
 
 
 
-#pprint(job_search_by_location(al,1692,"full-time"))#
+pprint(job_search_by_location(al,1692,"full-time"))
+sys.exit(33)#
 #print json.dumps(stats(job_search_by_location(al,1692,"full-time")))
 
 # jobs,quality_total,startup_max,equity_max,equity_cliff
