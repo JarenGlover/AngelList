@@ -58,7 +58,7 @@ def pagination(method,id):
     set_env =method(id)
     final_results = set_env
     last_page = set_env['last_page']
-    current_page = 1    #needs to be set to to two
+    current_page = 66    #needs to be set to to two
     job_results = {}
 
     #print job_results['last_page']
@@ -111,10 +111,11 @@ def pagination(method,id):
 
 def job_search_by_location(angel_h,location_id,job_type):
     jobs_result = {}
+    output =[]
     job_list = []
     api = angel_h.get_tag_jobs
     jobs = pagination(api,location_id)
-    #print json.dumpjobs)
+    #print json.dumps(jobs)
 
     #sys.exit(555)
     #jobs = angel_h.get_tag_jobs(location_id)
@@ -126,20 +127,33 @@ def job_search_by_location(angel_h,location_id,job_type):
             for skill_key in skill_info.keys():
                 #print skill_key
                 if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys()\
-                        and job['startup']['quality'] > 6:
+                        and job['startup']['quality'] > 6:  # remove quality
                    # print tag['display_name']
                     temp_job = {'title': job['title'],
                                 'job': job['angellist_url'],
+                                'job_id':job['id'],
                                 'startup':job['startup']['name'],
                                 'quality':job['startup']['quality'],
-                                'startup_min':job['salary_min'],
-                                'startup_max':job['salary_max'],
+                                'salary_min':job['salary_min'],
+                                'salary_max':job['salary_max'],
                                 'equity_min':job['equity_min'],
+                                'equity_max':job['equity_max'],
+                                'startup_id':job['startup']['id'],
+                                'equity_vest':job['equity_vest'],
                                 'equity_cliff':job['equity_cliff'],
                                 'currency_code':job['currency_code']}
 
+                    #print "temp job type %s" % type(temp_job)
+                    #print temp_job
+                    #sys.exit(33)
                     #temp_job.extend([job['title'],job['angellist_url']])
-                    jobs_result[job['id']] = temp_job
+                    #jobs_result[job['id']] = temp_job
+
+                    output.append(temp_job)
+                    jobs_result['job_id'] = output
+
+                    #jobs_result['job_id'] = temp_job
+
                     #print temp_job
                     #if not tag['display_name'] in job_list: job_list.append(job)
                     #print json.dumps(job_list)
@@ -150,9 +164,87 @@ def job_search_by_location(angel_h,location_id,job_type):
 
 
 
+def stats(jobs):
+    output = []
+    count = 0
+    quality_total = 0
+    startup_max = 0
+    equity_cliff =0
+    equity_vest = 0
+    equity_max = 0
+    #print json.dumps(jobs)
+    #print
+    #sys.exit(33)
+    for job in jobs['job_id']:
+        #print json.dumps(job)
+        #sys.exit(33)
+        #print json.dumps(job)
+        #print type(job)
+        #sys.exit(33)
+
+        try:
+            quality_total += int(job['quality'])
+            startup_max += int(job['salary_max'])
+            equity_max += float(job['equity_min'])
+            equity_vest += float(job['equity_vest'])
+            equity_cliff += float(job['equity_cliff'])
+            count += 1
+            output.append(job)
+        except:
+           # print "This are jobs that didn't have 100% data quality thus were not counted"
+            #print json.dumps(job)
+            pass
+    #sys.exit(44)
+    # avgs
+    quality_total /= count
+    startup_max /= count
+    equity_max  /= count
+    equity_cliff /= count
 
 
-pprint(job_search_by_location(al,1692,"full-time"))
+    '''  print '%f quality_total' % quality_total
+    print '%f startup_max' % startup_max
+    print '%f equity_max' % equity_max
+    print '%f equity_cliff' % equity_cliff
+    print '%f equity_vest' % equity_vest
+    print '%f count' % count'''
+    return {'output':output}, {'stats':{'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff}}
+
+
+
+
+#pprint(job_search_by_location(al,1692,"full-time"))#
+#print json.dumps(stats(job_search_by_location(al,1692,"full-time")))
+
+# jobs,quality_total,startup_max,equity_max,equity_cliff
+
+def algo(jobs,*args):
+
+    # unpack stats
+    for arg in args:
+        quality_total = arg['stats']['quality_total']
+        startup_max = arg['stats']['startup_max']
+        equity_max = arg['stats']['equity_max']
+        equity_cliff = arg['stats']['equity_cliff']
+
+    #print startup_max
+    #sys.exit(444)
+
+    for job in jobs['output']:
+        print job.values()
+        sys.exit(33)
+    #for j in jobs:
+        #print
+        #print a['stats']['startup_max']
+        #sys.exit(44)
+    for job in jobs:
+        print job
+    sys.exit(33)
+
+input_algo = stats(job_search_by_location(al,1692,"full-time"))
+
+print algo(*input_algo)
+
 sys.exit(33)
 
 
