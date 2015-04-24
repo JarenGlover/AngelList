@@ -13,8 +13,11 @@ sys.path.append('/Users/Glove/Desktop/lob/angel-list/angel')
 
 import angel
 JOB_TYPE = 'full-time'
+QUALITY = 5
+test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
+
 al = angel.AngelList(s.CLIENT_ID, s.CLIENT_SECRET, s.ACCESS_TOKEN)
-#print al
+
 
 def pprint(input):
     print json.dumps(input)
@@ -43,11 +46,11 @@ def me(angel_h):
 
      return user_info, skill_info, level_info
 
-#pprint(me(al))
+
 
 LOCATION_INFO, skill_info, level_info = me(al)
 
-test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
+
 
 # {1629: u'Cincinnati', 1782: u'United Kingdom', 2029: u'Shanghai'}  1692
 
@@ -116,11 +119,13 @@ def pagination(method,id):
 
 def get_all_jobs(angel_h,locations):
     jobs = []
-    for location_id in LOCATION_INFO:
+    for location_id in locations:
+        print location_id
         temp_jobs = job_search_by_location(angel_h,location_id,JOB_TYPE)
         jobs = jobs + temp_jobs
-    print json.dumps(jobs)
-    return len(jobs)
+    #print json.dumps(jobs)
+    print len(jobs)
+    return jobs
 
 
 def job_search_by_location(angel_h,location_id,job_type):
@@ -140,8 +145,8 @@ def job_search_by_location(angel_h,location_id,job_type):
             #print tag['display_name']
             for skill_key in skill_info.keys():
                 #print skill_key
-                if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys()\
-                        and job['startup']['quality'] > 6:  # remove quality
+                if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys() \
+                        and job['startup']['quality'] > QUALITY:  # remove quality
                    # print tag['display_name']
                     temp_job = {'title': job['title'],
                                 'job': job['angellist_url'],
@@ -177,11 +182,6 @@ def job_search_by_location(angel_h,location_id,job_type):
     return output  # rename output?
     #return len(jobs_result['jobs_by_location'])
 
-
-
-pprint(get_all_jobs(al,test_location_info))
-sys.exit(5)
-
 def stats(jobs):
     output = []
     count = 0
@@ -193,7 +193,7 @@ def stats(jobs):
     #print json.dumps(jobs)
     #print
     #sys.exit(33)
-    for job in jobs['jobs_by_location']:  # << change this
+    for job in jobs: #['jobs_by_location']:  # << change this
         #print json.dumps(job)
         #sys.exit(33)
         #print json.dumps(job)
@@ -228,10 +228,19 @@ def stats(jobs):
     print '%f count' % count'''
     return {'output':output}, {'stats':{'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff}}
 
+#pprint(get_all_jobs(al,LOCATION_INFO))
+jobs_output_final = get_all_jobs(al,LOCATION_INFO)
+
+#pprint(jobs_output_final)
+pprint(stats(jobs_output_final))
+sys.exit(5)
 
 
 
-pprint(job_search_by_location(al,1692,"full-time"))
+
+
+
+#pprint(job_search_by_location(al,1692,"full-time"))
 sys.exit(33)#
 #print json.dumps(stats(job_search_by_location(al,1692,"full-time")))
 
