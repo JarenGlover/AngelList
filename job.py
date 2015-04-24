@@ -7,17 +7,16 @@
 import json
 import settings as s
 import sys
-sys.path.append('/Users/Glove/Desktop/lob/angel-list/angel')
+import angel
+# needed to leverage updated CLI
+#sys.path.append(os.path.dirname(os.path.realpath(__file__))) # https://github.com/GloveDotCom/angel-list
+#print os.path.dirname(os.path.realpath(__file__))
+#test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
+
 # the input should be creditals
 
-
-import angel
 JOB_TYPE = 'full-time'
 QUALITY = 5
-test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
-
-al = angel.AngelList(s.CLIENT_ID, s.CLIENT_SECRET, s.ACCESS_TOKEN)
-
 
 def pprint(input):
     print json.dumps(input)
@@ -47,9 +46,8 @@ def me(angel_h):
      return user_info, skill_info, level_info
 
 
-
-LOCATION_INFO, skill_info, level_info = me(al)
-
+ANGEL_API_OBJECT = angel.AngelList(s.CLIENT_ID, s.CLIENT_SECRET, s.ACCESS_TOKEN)
+LOCATION_INFO, skill_info, level_info = me(ANGEL_API_OBJECT)
 
 
 # {1629: u'Cincinnati', 1782: u'United Kingdom', 2029: u'Shanghai'}  1692
@@ -120,11 +118,11 @@ def pagination(method,id):
 def get_all_jobs(angel_h,locations):
     jobs = []
     for location_id in locations:
-        print location_id
+        #print "%s location_id" % location_id
         temp_jobs = job_search_by_location(angel_h,location_id,JOB_TYPE)
         jobs = jobs + temp_jobs
     #print json.dumps(jobs)
-    print len(jobs)
+    #print '%d equity_vest' % jobs
     return jobs
 
 
@@ -229,7 +227,7 @@ def stats(jobs):
     return {'output':output}, {'stats':{'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff}}
 
 #pprint(get_all_jobs(al,LOCATION_INFO))
-jobs_output_final = get_all_jobs(al,LOCATION_INFO)
+jobs_output_final = get_all_jobs(ANGEL_API_OBJECT,LOCATION_INFO)
 
 #pprint(jobs_output_final)
 pprint(stats(jobs_output_final))
@@ -289,64 +287,3 @@ sys.exit(33)
 
 #pprint(me(al))
 
-
-
-
-def getSkills(angel,level=3):
-    '''
-    Return a dic of skills based on the skills tag for users
-    :param angel:
-    :return:
-    '''
-    skills = []
-    for x in angel.get_self()['skills']:
-        #print x['id']
-        if x['level'] >= level:
-            #print x['name']
-            skills.append(x['id'])
-  #  print skills
-    return skills
-
-
-# search for jobs based on the skills i'm best at
-
-def jobs_by_id(angel,skills_ids):
-    for skill in skills_ids:
-        print skill
-        companies = []
-        for employer in angel.get_tag_jobs(skill)['jobs']:
-            if employer['startup']['quality'] > 8:
-                companies
-           # print employer['name']['quality']
-            sys.exit(187)
-
-        '''    for startup in json.dumps(employer['startup']):
-                print startup['name']
-                print type(startup)
-                sys.exit(888)
-
-            sys.exit(187)
-             if startup['quality'] > 7:
-                    print employer['quality']
-                    companies.append()'''
-
-
-
-
-#pprint(getSkills(al,3))
-#pprint(al.get_tag_jobs(98210))
-#jobs_by_id(al,getSkills(al,3))
-
-
-
-#angel.get_tag_jobs(id)
-#print al.get_jobs(page=1)
-
-
-
-#print al.get_search('bitcoin','Startup')
-#print al.get_startup('page=1')
-#print json.dumps(al.get_self()['skills'])
-
-#print al.get_tags('1')
-#print first_page_jobs
