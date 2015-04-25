@@ -7,54 +7,67 @@
 import json
 import settings as s
 import sys
+# leverages Bugra's CLI - I needed to update it & wanted to easy include - will create test & PR soooon
 import angel
-# needed to leverage updated CLI
-#sys.path.append(os.path.dirname(os.path.realpath(__file__))) # https://github.com/GloveDotCom/angel-list
-#print os.path.dirname(os.path.realpath(__file__))
+
+
 #test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
 
-# the input should be creditals
 
 JOB_TYPE = 'full-time'
 QUALITY = 5
+
+
+# Code to process JSON and create a AL's API object
+#####dkd
+###################
+
+def parse_input():
+
+     if not sys.stdin.isatty():
+        global CLIENT_ID, CLIENT_SECRET, ACCESS_TOKEN
+        try:
+            cmd_input = json.load(sys.stdin)
+
+            CLIENT_ID = cmd_input['CLIENT_ID']
+            CLIENT_SECRET = cmd_input['CLIENT_SECRET']
+            ACCESS_TOKEN = cmd_input['ACCESS_TOKEN']
+
+        except:
+            raise ValueError('Error processing JSON input - must be valid JSON')
+     else:
+         raise ValueError('You must provide a JSON structured input')
+
 
 def pprint(input):
     print json.dumps(input)
 
 def me(angel_h):
-     user_info = {}
-     skill_info = {}
-     level_info = {}
+
+     global USER_INFO, SKILL_INFO, LEVEL_INFO
+
+     USER_INFO = {}
+     SKILL_INFO = {}
+     LEVEL_INFO = {}
      # only want to call the API once
      me_result = angel_h.get_self()
 
      # grab location info
      for loc in me_result['locations']:
      #for loc in angel_h.get_self()['locations']:
-         user_info[loc['id']] = loc['display_name']
+         USER_INFO[loc['id']] = loc['display_name']
 
      # grab skill info
      for skill in me_result['skills']:
-         skill_info[skill['id']] = skill['name']
-         #skill_info[skill['id']]['level'] = '3' #skill['level']
+         SKILL_INFO[skill['id']] = skill['name']
+         #SKILL_INFO[skill['id']]['level'] = '3' #skill['level']
      # TODO: build levels as nested dic/JSON
 
      # grab levels
      for level in me_result['skills']:
-         level_info[level['id']] = level['level']
+         LEVEL_INFO[level['id']] = level['level']
 
-     return user_info, skill_info, level_info
-
-
-ANGEL_API_OBJECT = angel.AngelList(s.CLIENT_ID, s.CLIENT_SECRET, s.ACCESS_TOKEN)
-LOCATION_INFO, skill_info, level_info = me(ANGEL_API_OBJECT)
-
-
-# {1629: u'Cincinnati', 1782: u'United Kingdom', 2029: u'Shanghai'}  1692
-
-#print LOCATION_INFO.keys()
-#print skill_info.keys()
-#sys.exit(33)
+     return USER_INFO, SKILL_INFO, LEVEL_INFO
 
 def pagination(method,id):
 
@@ -65,55 +78,22 @@ def pagination(method,id):
     set_env =method(id)
     final_results = set_env
     last_page = set_env['last_page']
-    current_page = 0    #needs to be set to to two
+    current_page = 89    #needs to be set to to two
     job_results = {}
 
-    #print job_results['last_page']
-    # sys.exit(44)
-    #last = job_results['last_page']
-
-    #last_page = 1000000000
-    #while job_results['page'] != 2: #page['last_page']:
     while current_page < last_page: #page['last_page']:
         #job_results = request.get_tag_jobs(id, page = num)
         job_results = method(id,page=current_page)
         last_page = job_results['last_page']
-        '''for res in job_results['jobs']:
-            print json.dumps(res['title'])
-            results.append(res)
-            #final_results[current_page] = res
-            break
-        '''
-        #print json.dumps(job_results)
-        #sys.exit(33)
 
-        #break
-        #print type(job_results)
-
-        #print json.dumps(dict(job_results,**final_results))
-        #jaren = {}
-        #print json.dumps(final_results['jobs'])
-        #print json.dumps(job_results['jobs'])
         output = final_results['jobs'] + job_results['jobs']
         final_results['jobs'] = output
-        #print json.dumps(final_results)
-
-        # jaren = final_results['jobs'].update(job_results['jobs'])
-        #print json.dumps(jaren)
-        #sys.exit(333)
-
-        #final_results['jobs'].append(job_results)
 
 
         current_page = current_page + 1
-        #print "------------------------------"
-        #print results['jobs']['title']
-        #print results['page']
-    #print len(results)
-    #final_results['jobs'] = results
-    #return json.dumps(final_results)
+
     return final_results
-    #return json.dumps(JAREN)
+
 
 def get_all_jobs(angel_h,locations):
     jobs = []
@@ -121,8 +101,7 @@ def get_all_jobs(angel_h,locations):
         #print "%s location_id" % location_id
         temp_jobs = job_search_by_location(angel_h,location_id,JOB_TYPE)
         jobs = jobs + temp_jobs
-    #print json.dumps(jobs)
-    #print '%d equity_vest' % jobs
+
     return jobs
 
 
@@ -141,7 +120,7 @@ def job_search_by_location(angel_h,location_id,job_type):
         #if job['job_type'] == job_type and job[]
         for tag in job['tags']:
             #print tag['display_name']
-            for skill_key in skill_info.keys():
+            for skill_key in SKILL_INFO.keys():
                 #print skill_key
                 if tag['id'] == skill_key and job['job_type']== job_type and job['id'] not in jobs_result.keys() \
                         and job['startup']['quality'] > QUALITY:  # remove quality
@@ -182,21 +161,15 @@ def job_search_by_location(angel_h,location_id,job_type):
 
 def stats(jobs):
     output = []
+    stats_output =[]
     count = 0
     quality_total = 0
     startup_max = 0
     equity_cliff =0
     equity_vest = 0
     equity_max = 0
-    #print json.dumps(jobs)
-    #print
-    #sys.exit(33)
-    for job in jobs: #['jobs_by_location']:  # << change this
-        #print json.dumps(job)
-        #sys.exit(33)
-        #print json.dumps(job)
-        #print type(job)
-        #sys.exit(33)
+
+    for job in jobs:
 
         try:
             quality_total += int(job['quality'])
@@ -207,10 +180,10 @@ def stats(jobs):
             count += 1
             output.append(job)
         except:
-           # print "This are jobs that didn't have 100% data quality thus were not counted"
+            # print "This are jobs that didn't have 100% data quality thus were not counted"
             #print json.dumps(job)
             pass
-    #sys.exit(44)
+
     # avgs
     quality_total /= count
     startup_max /= count
@@ -224,27 +197,32 @@ def stats(jobs):
     print '%f equity_cliff' % equity_cliff
     print '%f equity_vest' % equity_vest
     print '%f count' % count'''
-    return {'output':output}, {'stats':{'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff}}
+    stats_output = {'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff, 'total_count':count}
+    print stats_output['quality_total']
 
-#pprint(get_all_jobs(al,LOCATION_INFO))
-jobs_output_final = get_all_jobs(ANGEL_API_OBJECT,LOCATION_INFO)
-
-#pprint(jobs_output_final)
-pprint(stats(jobs_output_final))
-sys.exit(5)
-
+    #return {'output':output}, {'stats':{'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff, 'total_count':count}}
+    return {'output':output}, {'stats_output':stats_output}
+    #sys.exit(3)
+    #return {'output':output, 'stats_output':stats_output}
 
 
+def path_startup(api_object,jobs_input):
+    #print type(jobs)
+    #print type(args)
+    #print jobs
+    #print args
+    #print path_input['stats_output']['total_count']
+    #sys.exit(77)
+    for job in jobs_input['output']:
+        print job['startup_id']
+    sys.exit(33)
+    for job in path_input['output']:
+        print job
 
+        #print api_object.get_paths(startup_ids=jobs['startup_id'],direction='followed')['connector']
+        #sys.exit(77)
 
-
-#pprint(job_search_by_location(al,1692,"full-time"))
-sys.exit(33)#
-#print json.dumps(stats(job_search_by_location(al,1692,"full-time")))
-
-# jobs,quality_total,startup_max,equity_max,equity_cliff
-
-def algo(jobs,*args):
+def algorithm(jobs,*args):
 
     # unpack stats
     for arg in args:
@@ -267,23 +245,30 @@ def algo(jobs,*args):
         print job
     sys.exit(33)
 
-input_algo = stats(job_search_by_location(al,1692,"full-time"))
+#input_4_algorithm = stats(job_search_by_location(al,1692,"full-time"))
 
-print algo(*input_algo)
-
-sys.exit(33)
+#print algorithm(*input_4_algorithm)
 
 
 
+def main ():
+    parse_input()
 
-print pagination(al.get_tag_jobs,1692)
+    ANGEL_API_OBJECT = angel.AngelList(CLIENT_ID, CLIENT_SECRET, ACCESS_TOKEN)
+    #sys.exit(44)
+    LOCATION_INFO, SKILL_INFO, LEVEL_INFO = me(ANGEL_API_OBJECT)
+    jobs_output_final = get_all_jobs(ANGEL_API_OBJECT,LOCATION_INFO)
 
-sys.exit(33)
-#pprint(job_search_by_location(al,1629,"full-time"))
+    jobs_final,stats_output = stats(jobs_output_final)
+    path_startup(ANGEL_API_OBJECT,jobs_final)
+    #pprint(stats_output)
+    #print type(stats_output['output'])
+    #pprint(path_startup(ANGEL_API_OBJECT,stats_output))
+    #pprint(path_startup(ANGEL_API_OBJECT,*stats_output))
 
-##page = al.get_tag_jobs(1692,page=3)
-#print page['last_page']
-#print page['page']
 
-#pprint(me(al))
+if __name__ == "__main__":
+    main()
+    #print "we made it"
 
+#print pagination(al.get_tag_jobs,1692)
