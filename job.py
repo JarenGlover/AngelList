@@ -78,7 +78,7 @@ def pagination(method,id):
     set_env =method(id)
     final_results = set_env
     last_page = set_env['last_page']
-    current_page = 89    #needs to be set to to two
+    current_page = 66    #needs to be set to to two
     job_results = {}
 
     while current_page < last_page: #page['last_page']:
@@ -213,15 +213,120 @@ def path_startup(api_object,jobs_input):
     #print args
     #print path_input['stats_output']['total_count']
     #sys.exit(77)
+    count = 1
+    path_avg = 0.0
     for job in jobs_input['output']:
-        print job['startup_id']
-    sys.exit(33)
-    for job in path_input['output']:
-        print job
+        path = api_object.get_paths(startup_ids=job['startup_id'],direction='followed')
+        #path = api_object.get_paths(startup_ids=144696,direction='followed')
+        #print type(path)
+        #print path.keys()
+        #pprint(path.values())
+        #print type(path['144696'])
+        #print path
+        #break
+
+
+        if path:
+            #pprint(path[str(job['startup_id'])])
+            #pprint(len(path[str(job['startup_id'])]))
+            #sys.exit(3)
+            for connect in path[str(job['startup_id'])]:
+                pprint(connect)
+                count += 1
+                path_avg += float(job['path'])
+                job['path'] = len(connect)
+
+                #pprint(len(connect))
+                #pprint(job)
+                pprint("-----------------")
+        else:
+            #print job
+            #print job['startup_id']
+
+            #print jobs_input['output'][str(job(['startup_id']))]
+           # startup_id = str(job(['startup_id']))
+            pprint(jobs_input['output'])
+            sys.exit(3)
+            print jobs_input['output'][34598]
+
+
+        sys.exit(4)
+        '''
+                job['path'] = len(connect)
+                pprint(job)
+                path_avg += float(job['path'])
+                count += 1
+                pprint(count)
+                pprint("-----------------")
+                #sys.exit(4)
+        path_avg /= count
+
+        pprint(path_avg)
+        '''
+        '''
+            #pprint(path)
+            pprint(path[str(job['startup_id'][0])])
+            pprint(len(path[str(job['startup_id'][0])]))
+            sys.exit(33)
+            #pprint(job)
+            #print type(job)
+            job['path'] = len(path)
+            pprint(job)
+            count += 1
+            pprint(count)
+            pprint("-----------------")
+            sys.exit(33)
+
+
+
+
+           for jaren in path['144696'][0]:
+                #print type(jaren)
+                print len(jaren)
+                #pprint(jaren)
+                sys.exit(33)
+            sys.exit(33)
+        print type(json.load(path['144696']))
+        sys.exit(44)
+        #print job['startup_id']
+        if path:
+            #print path.keys()
+            #print job['startup_id']
+            #print path['144696']
+            #print path[str(job['startup_id'])]
+            #print path[job['startup_id']]
+            #pprint(path[str(job['startup_id'])])
+            #print type(path[str(job['startup_id'])])
+            #print [path[str(job['startup_id'])]].keys()
+            path_json = path[str(job['startup_id'])]
+
+            #path_json = json.loads(path[str(job['startup_id'])])
+            print type(path_json)
+            sys.exit(44)
+            pprint(path_json)
+            pprint(path_json.keys())
+            pprint(path_json.values())
+            sys.exit(44)
+            for connector in path[str(job['startup_id'])]:
+                #pprint(connector.)
+                sys.exit(44)
+            results = path.values()
+            print "results are %s" % results
+            print type(results)
+            sys.exit(33)
+            print type(path)
+            for connection in path:
+                print connection
+
+            #pprint(api_object.get_paths(startup_ids=job['startup_id'],direction='followed'))
+            #print type(api_object.get_paths(startup_ids=job['startup_id'],direction='followed'))
+            sys.exit(4)
+    #for job in path_input['output']:
+        #print job
 
         #print api_object.get_paths(startup_ids=jobs['startup_id'],direction='followed')['connector']
         #sys.exit(77)
-
+'''
 def algorithm(jobs,*args):
 
     # unpack stats
