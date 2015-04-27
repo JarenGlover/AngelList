@@ -5,13 +5,10 @@
 '''
 
 import json
-import settings as s
 import sys
+
 # leverages Bugra's CLI - I needed to update it & wanted to easy include - will create test & PR soooon
 import angel
-
-
-# test_location_info = {1629: u'Cincinnati', 2029: u'Shanghai'}
 
 
 JOB_TYPE = 'full-time'
@@ -24,6 +21,10 @@ JOB_LIMIT = 10
 ###################
 
 def parse_input():
+    '''
+
+    :return:
+    '''
     if not sys.stdin.isatty():
         global CLIENT_ID, CLIENT_SECRET, ACCESS_TOKEN
         try:
@@ -40,10 +41,20 @@ def parse_input():
 
 
 def pprint(input):
+    '''
+
+    :param input:
+    :return:
+    '''
     print json.dumps(input)
 
 
 def me(angel_h):
+    '''
+
+    :param angel_h:
+    :return:
+    '''
     global USER_INFO, SKILL_INFO, LEVEL_INFO
 
     USER_INFO = {}
@@ -71,14 +82,22 @@ def me(angel_h):
 
 
 def pagination(method, id):
-    results = []
+    '''
+
+    :param method:
+    :param id:
+    :return:
+    '''
 
     final_results = {}
-    # TODO see note
+
     set_env = method(id)
     final_results = set_env
     last_page = set_env['last_page']
-    current_page = 60  #needs to be set to to two
+
+    #TODO make sure this is zero
+
+    current_page = 0;  #needs to be set to to two
     job_results = {}
 
     while current_page < last_page:  #page['last_page']:
@@ -95,6 +114,12 @@ def pagination(method, id):
 
 
 def get_all_jobs(angel_h, locations):
+    '''
+
+    :param angel_h:
+    :param locations:
+    :return:
+    '''
     jobs = []
     for location_id in locations:
         #print "%s location_id" % location_id
@@ -105,6 +130,13 @@ def get_all_jobs(angel_h, locations):
 
 
 def job_search_by_location(angel_h, location_id, job_type):
+    '''
+
+    :param angel_h:
+    :param location_id:
+    :param job_type:
+    :return:
+    '''
     jobs_result = {}  #might need to remove ?
     output = []
     job_list = []
@@ -121,7 +153,9 @@ def job_search_by_location(angel_h, location_id, job_type):
             #print tag['display_name']
             for skill_key in SKILL_INFO.keys():
                 #print skill_key
-                if tag['id'] == skill_key and job['job_type'] == job_type and job['id'] not in jobs_result.keys() \
+                #TODO look at jobs_results().keys? WHY - should it be based on output?
+                #if tag['id'] == skill_key and job['job_type'] == job_type and job['id'] not in jobs_result.keys() \
+                if tag['id'] == skill_key and job['job_type'] == job_type and job['id'] \
                         and job['startup']['quality'] > QUALITY:  # remove quality
                     # print tag['display_name']
                     temp_job = {'title': job['title'],
@@ -148,24 +182,33 @@ def job_search_by_location(angel_h, location_id, job_type):
                     #jobs_result['jobs_by_location'] = output
 
                     #jobs_result['job_id'] = temp_job
-    jobs_result['jobs_by_location'] = output  # REMOVE THIS?
+    #jobs_result['jobs_by_location'] = output  # REMOVE THIS?
     #print temp_job
     #if not tag['display_name'] in job_list: job_list.append(job)
     #print json.dumps(job_list)
-    #sys.exit(333)
-    #sys.exit(333)
     #print json.dumps(jobs_result)
     return output  # rename output?
     #return len(jobs_result['jobs_by_location'])
 
 
 def check_max(input, max):
+    '''
+
+    :param input:
+    :param max:
+    :return:
+    '''
     if input > max:
         max = input
     return max
 
 
 def stats(jobs):
+    '''
+
+    :param jobs:
+    :return:
+    '''
     output = []
     stats_output = []
     count = 0
@@ -182,7 +225,7 @@ def stats(jobs):
     for job in jobs:
 
         try:
-            #pprint(job)
+
             max_quality_total = check_max(max_quality_total, int(job['quality']))
             max_startup_max = check_max(max_startup_max, int(job['salary_max']))
             max_equity_cliff = check_max(max_equity_cliff, float(job['equity_cliff']))
@@ -207,12 +250,6 @@ def stats(jobs):
     equity_max /= count
     equity_cliff /= count
 
-    '''  print '%f quality_total' % quality_total
-    print '%f startup_max' % startup_max
-    print '%f equity_max' % equity_max
-    print '%f equity_cliff' % equity_cliff
-    print '%f equity_vest' % equity_vest
-    print '%f count' % count'''
     stats_output = {'avg_quality_total': quality_total, 'avg_startup_max': startup_max, 'avg_equity_max': equity_max, \
                     'avg_equity_cliff': equity_cliff, 'total_count': count, 'max_quality_total': max_quality_total, \
                     'max_startup_max': max_startup_max, 'max_equity_cliff': max_equity_cliff, 'max_equity_max': \
@@ -220,39 +257,30 @@ def stats(jobs):
     }
     #print stats_output['quality_total']
 
-    #return {'output':output}, {'stats':{'quality_total':quality_total, 'startup_max':startup_max, 'equity_max':equity_max, 'equity_cliff':equity_cliff, 'total_count':count}}
+    #TODO review this print statment
+
     pprint(count)
-    pprint("+++count is about++++")
+    pprint("+++The total job counts is above++++")
+
     return {'output': output}, {'stats_output': stats_output}
-    #sys.exit(3)
-    #return {'output':output, 'stats_output':stats_output}
 
 
 def path_startup(api_object, jobs_input, stats_input):
-    #pprint(stats_input["stats_output"]["max_equity_vest"])
+    '''
 
-    #sys.exit(3)
-    #print type(jobs)
-    #print type(args)
-    #print jobs
-    #print args
-    #print path_input['stats_output']['total_count']
-    #sys.exit(77)
-    output_handle = open("output.json", "wb")
+    :param api_object:
+    :param jobs_input:
+    :param stats_input:
+    :return:
+    '''
+    output_handle = open("output.json", "w")
     final_output = []
-    rebuilt = {}
+    #rebuilt = {}
     top_ten = {}
-    count = 1
+    count = 0
     path_avg = 0.0
     for job in jobs_input['output']:
         path = api_object.get_paths(startup_ids=job['startup_id'], direction='followed')
-        #path = api_object.get_paths(startup_ids=144696,direction='followed')
-        #print type(path)
-        #print path.keys()
-        #pprint(path.values())
-        #print type(path['144696'])
-        #print path
-        #break
 
 
         if path:
@@ -260,56 +288,21 @@ def path_startup(api_object, jobs_input, stats_input):
 
             output_handle.write(json.dumps(job,indent=4,sort_keys=True))
 
-            #print type(path[str(job['startup_id'])][0])
-            #print type(path[str(job['startup_id'])])
-            #sys.exit(3)
-            #pprint(path[str(job['startup_id'])])
-            #pprint(len(path[str(job['startup_id'])]))
-            #sys.exit(3)
-            #print path
             count += 1
             for connect in path[str(job['startup_id'])]:
-                #for connect in path['144696']:
-                #pprint(connect)
-                #print float(len(connect))
 
                 path_avg += float(len(connect))
                 job['path'] = len(connect)
-                #job['algorithm'] = float(job['equity_vest']) * float(job['equity_cliff']) * float(job['path']) \
-                #            * float(job['salary_min']) * float(job['quality']) * float(job['equity_min'])
-                #job['algorithm_'] = float(job['equity_vest']) + float(job['equity_cliff']) + float(job['path']) \
-                #                    + float(job['salary_min']) + float(job['quality']) + float(job['equity_min'])
+
                 job['algorithm'] = (stats_input["stats_output"]["max_equity_vest"] - float(job['equity_vest'])) + (
                     stats_input["stats_output"]["max_equity_cliff"] - float(job['equity_cliff'])) + float(job['path']) \
                                    + float(job['salary_min']) + float(job['quality']) + float(job['equity_min'])
 
-                # job['algorithm'] = algorithm
-                # pprint(job)
-                # TODO
-                # Now that I know I can't del the element with no path from the org object - i need to build my own
-                # I don't think the else is useful now
-
-                #pprint(len(connect))
-                #pprint(job)
-                #pprint("-----------------")
-
-                #sys.exit(4)
-            '''
-            else:
-                #print job
-                #print job['startup_id']
-
-                #print jobs_input['output'][str(job(['startup_id']))]
-               # startup_id = str(job(['startup_id']))
-                #pprint(jobs_input['output'])
-                #sys.exit(3)
-                #print jobs_input['output'][34598]
-            '''
-            rebuilt[job['startup_id']] = job
+            #rebuilt[job['startup_id']] = job
             final_output.append(job)
 
 
-            if len(top_ten) < 10:
+            if len(top_ten) < JOB_LIMIT:
 
                 top_ten[job['job_id']] = job
                 #pprint( print "This is ... %d and lenthis is %d" % (job['startup_id'], len(top_ten))
@@ -322,124 +315,19 @@ def path_startup(api_object, jobs_input, stats_input):
                     top_ten[job['startup_id']] = job
 
 
-    #pprint(rebuilt)
+
     pprint("-----------------")
     pprint(top_ten)
+    pprint("The total jobs that was eligible via a Path connection is below")
     pprint(count)
     output_handle.close()
-    #return  rebuilt
-
-
-    #sys.exit(4)
-
-    '''
-                job['path'] = len(connect)
-                pprint(job)
-                path_avg += float(job['path'])
-                count += 1
-                pprint(count)
-                pprint("-----------------")
-                #sys.exit(4)
-        path_avg /= count
-
-        pprint(path_avg)
-        '''
-    '''
-            #pprint(path)
-            pprint(path[str(job['startup_id'][0])])
-            pprint(len(path[str(job['startup_id'][0])]))
-            sys.exit(33)
-            #pprint(job)
-            #print type(job)
-            job['path'] = len(path)
-            pprint(job)
-            count += 1
-            pprint(count)
-            pprint("-----------------")
-            sys.exit(33)
-
-
-
-
-           for jaren in path['144696'][0]:
-                #print type(jaren)
-                print len(jaren)
-                #pprint(jaren)
-                sys.exit(33)
-            sys.exit(33)
-        print type(json.load(path['144696']))
-        sys.exit(44)
-        #print job['startup_id']
-        if path:
-            #print path.keys()
-            #print job['startup_id']
-            #print path['144696']
-            #print path[str(job['startup_id'])]
-            #print path[job['startup_id']]
-            #pprint(path[str(job['startup_id'])])
-            #print type(path[str(job['startup_id'])])
-            #print [path[str(job['startup_id'])]].keys()
-            path_json = path[str(job['startup_id'])]
-
-            #path_json = json.loads(path[str(job['startup_id'])])
-            print type(path_json)
-            sys.exit(44)
-            pprint(path_json)
-            pprint(path_json.keys())
-            pprint(path_json.values())
-            sys.exit(44)
-            for connector in path[str(job['startup_id'])]:
-                #pprint(connector.)
-                sys.exit(44)
-            results = path.values()
-            print "results are %s" % results
-            print type(results)
-            sys.exit(33)
-            print type(path)
-            for connection in path:
-                print connection
-
-            #pprint(api_object.get_paths(startup_ids=job['startup_id'],direction='followed'))
-            #print type(api_object.get_paths(startup_ids=job['startup_id'],direction='followed'))
-            sys.exit(4)
-    #for job in path_input['output']:
-        #print job
-
-        #print api_object.get_paths(startup_ids=jobs['startup_id'],direction='followed')['connector']
-        #sys.exit(77)
-'''
-
-
-def algorithm(jobs, *args):
-    # unpack stats
-    for arg in args:
-        quality_total = arg['stats']['quality_total']
-        startup_max = arg['stats']['startup_max']
-        equity_max = arg['stats']['equity_max']
-        equity_cliff = arg['stats']['equity_cliff']
-
-    #print startup_max
-    #sys.exit(444)
-
-    for job in jobs['output']:
-        print job.values()
-        sys.exit(33)
-        #for j in jobs:
-        #print
-        #print a['stats']['startup_max']
-        #sys.exit(44)
-    for job in jobs:
-        print job
-    sys.exit(33)
-
-
-#input_4_algorithm = stats(job_search_by_location(al,1692,"full-time"))
-
-#print algorithm(*input_4_algorithm)
-
 
 
 def main():
+    '''
+
+    :return:
+    '''
     parse_input()
 
     ANGEL_API_OBJECT = angel.AngelList(CLIENT_ID, CLIENT_SECRET, ACCESS_TOKEN)
@@ -452,10 +340,6 @@ def main():
     #pprint(stats_output)
     #sys.exit(3)
     path_startup(ANGEL_API_OBJECT, jobs_final, stats_output)
-    #pprint(stats_output)
-    #print type(stats_output['output'])
-    #pprint(path_startup(ANGEL_API_OBJECT,stats_output))
-    #pprint(path_startup(ANGEL_API_OBJECT,*stats_output))
 
 
 if __name__ == "__main__":
