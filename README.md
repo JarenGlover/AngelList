@@ -37,6 +37,7 @@ Basic Flow of the application:
 7. For each job idenitfy a path value to see how related or unrelated you are to this job. (ie. is someone in your angellist network who connect you with this startup). This uses the [/path route](https://angel.co/api/spec/paths#GET_paths). I know this should have been done in the same loop in step 6. 
 
 Please note that the some method (path_startup) that caculates the path also generate a value for each job. The value is simple a addition of the 
+
 1. Job's Equity Vest #
 2. Job's Equity Cliff #
 3. Job's Path Value (only returns jobs that have a path value)
