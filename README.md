@@ -24,9 +24,9 @@ I usually run it like below:
 `
 
 `
-real	10m43.363s
-user	0m5.628s
-sys 	0m0.775s
+real	9m43.683s
+user	0m6.259s
+sys 	0m0.752s
 `
 
 My account processed 1000+ plus jobs so it takes a little time.
