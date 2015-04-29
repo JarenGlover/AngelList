@@ -22,9 +22,14 @@ I usually run it like below:
 `$ time python job.py < input.json.old | jq '.' > top_ten.json.new
 `
 
-`real 13m3.826s user    0m9.367s sys 0m1.273s`
+`
+real	10m43.363s
+user	0m5.628s
+sys 	0m0.775s
+`
 
-My account processed 1000+ plus jobs so it takes a little time. Sorry with restructed later....use [numpy](http://www.numpy.org/) or something ...
+My account processed 1000+ plus jobs so it takes a little time.
+Sorry with restructured later....use [numpy](http://www.numpy.org/) or something ...
 
 Basic Flow of the application:
 1. Parse the input file to verify it is an legit JSON struture 
@@ -41,6 +46,9 @@ Please note that the some method (path_startup) that caculates the path also gen
 3. Job's Path Value (only returns jobs that have a path value)
 4. Job's Salary Min #
 5. Job's Equity Min #
+
+NOTE: If your job count is extremely high it may hit the API limit
+An example error would look like "urllib2.HTTPError: HTTP Error 403: Forbidden"
 
 There is some assumption built into the program. 
 - Your Angel List profile is robust - i.e. location, skills, network etc
