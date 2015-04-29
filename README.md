@@ -8,11 +8,12 @@ An Python based application, that when given some AngelList related information 
 The program requires three inputs client id, client secret, and access token. These three variables must be provided for the programs to leverage your information on AngelList. You can obtain these items by creating an [AngelList application](https://angel.co/api/oauth/clients/new). [This is because they require [OAuth](https://angel.co/api/oauth/faq) for some API calls]. An example file can be found under the name "input.json". 
 
 {
+     
       "CLIENT_ID": "",
         
-          "CLIENT_SECRET": "",
+      "CLIENT_SECRET": "",
             
-              "ACCESS_TOKEN": ""
+       "ACCESS_TOKEN": ""
 }
 
 You can the program from the command with the below command combination.`python job.py < input.json`
@@ -41,6 +42,7 @@ Basic Flow of the application:
 7. For each job idenitfy a path value to see how related or unrelated you are to this job. (ie. is someone in your angellist network who connect you with this startup). This uses the [/path route](https://angel.co/api/spec/paths#GET_paths). I know this should have been done in the same loop in step 6. 
 
 Please note that the some method (path_startup) that caculates the path also generate a value for each job. The value is simple a addition of the 
+
 1. Job's Equity Vest #
 2. Job's Equity Cliff #
 3. Job's Path Value (only returns jobs that have a path value)
