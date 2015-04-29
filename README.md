@@ -8,11 +8,12 @@ An Python based application, that when given some AngelList related information 
 The program requires three inputs client id, client secret, and access token. These three variables must be provided for the programs to leverage your information on AngelList. You can obtain these items by creating an [AngelList application](https://angel.co/api/oauth/clients/new). [This is because they require [OAuth](https://angel.co/api/oauth/faq) for some API calls]. An example file can be found under the name "input.json". 
 
 {
+     
       "CLIENT_ID": "",
         
-          "CLIENT_SECRET": "",
+      "CLIENT_SECRET": "",
             
-              "ACCESS_TOKEN": ""
+       "ACCESS_TOKEN": ""
 }
 
 You can the program from the command with the below command combination.`python job.py < input.json`
