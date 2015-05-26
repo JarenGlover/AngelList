@@ -8,6 +8,10 @@ import json
 import sys
 from time import gmtime, strftime
 
+from joblib import Parallel, delayed
+import multiprocessing
+from multiprocessing import Pool
+
 # leverages Bugra's CLI - I needed to update it & wanted to easy include - will create test & PR soooon
 import angel
 
@@ -292,6 +296,10 @@ def path_startup(api_object, jobs_input, stats_input):
     top_ten = {}
     count = 0
     path_avg = 0.0
+    #pprint(jobs_input)
+    #print "^^^^^---INSIDEPATH--^^^^"
+    #print type(jobs_input)
+    #sys.exit(3)
     for job in jobs_input['output']:
         # TODO send this path request with mitiple IDs for lest API calls :p
         path = api_object.get_paths(startup_ids=job['startup_id'], direction='followed')
@@ -306,19 +314,28 @@ def path_startup(api_object, jobs_input, stats_input):
                 print "Error trying to write a job to the output.json file"
             '''
             count += 1
-            for connect in path[str(job['startup_id'])]:
+            #pprint(path[str(job['startup_id'])][0])
+            #print len(path[str(job['startup_id'])][0])
 
-                path_avg += float(len(connect))
-                job['path'] = len(connect)
+            #for connect in path[str(job['startup_id'])]:
+            #print connect
+            #sys.exit(33)
+            path_avg += float(len(path[str(job['startup_id'])][0]))
+            job['path'] = len(path[str(job['startup_id'])][0])
 
-                job['algorithm'] = (stats_input["stats_output"]["max_equity_vest"] - float(job['equity_vest'])) + (
-                    stats_input["stats_output"]["max_equity_cliff"] - float(job['equity_cliff'])) + float(job['path']) \
-                                   + float(job['salary_min']) + float(job['quality']) + float(job['equity_min'])
+            job['algorithm'] = (stats_input["stats_output"]["max_equity_vest"] - float(job['equity_vest'])) + (
+                stats_input["stats_output"]["max_equity_cliff"] - float(job['equity_cliff'])) + float(job['path']) \
+                               + float(job['salary_min']) + float(job['quality']) + float(job['equity_min'])
 
             #rebuilt[job['startup_id']] = job
             final_output.append(job)
 
 
+    print "total number with path is %d" % count
+    return final_output
+
+
+    '''      #TODO make the below a function so I can combine the output after a parallel run then process ?
             if len(top_ten) < JOB_LIMIT:
 
                 top_ten[job['job_id']] = job
@@ -331,12 +348,45 @@ def path_startup(api_object, jobs_input, stats_input):
 
 
 
+    #TODO return top_ten and count and print in the main
     pprint("-----------------FINAL INFO---TOP TEN BELOW-----------------")
     pprint(top_ten)
 
     pprint("The total jobs that was eligible via a Path connection is below")
     pprint(count)
    # OUTPUT_HANDLE.close()
+    '''
+
+def top_ten(job_input):
+    #TODO make the below a function so I can combine the output after a parallel run then process ?
+    top_ten = {}
+    count = 0
+    for job in job_input:
+        #print job
+        #print type(job)
+        #print type(dict(job))
+        #print dict(job)
+        #sys.exit(3)
+        count +=1
+        #print "the length of top list is %d" % len(top_ten)
+        if len(top_ten) < JOB_LIMIT:
+
+            top_ten[job['job_id']] = job
+
+        else:
+            pivot = min(top_ten,key=top_ten.get)
+            if job['algorithm'] > top_ten[pivot]:
+                top_ten.pop(pivot,None)
+                top_ten[job['startup_id']] = job
+
+
+    #TODO return top_ten and count and print in the main
+    pprint("-----------------FINAL INFO---TOP TEN BELOW-----------------")
+    pprint(top_ten)
+
+    pprint("The total jobs that was eligible via a Path connection is below")
+    pprint(count)
+
 
 
 def main():
@@ -356,9 +406,62 @@ def main():
 
     jobs_final, stats_output = stats(jobs_output_final)
     pprint("time stats were calculated %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime())))
+    total_num_jobs = len(jobs_output_final)
+    #print type(jobs_final)
+    #sys.exit(3)
+    left = {}
+    parallelization = {}
+    right = {}
+    spilt = []
+    #parallelization['0'] = dict(jobs_final.items()[len(jobs_final)/2:])
+    #print type(parallelization['0'])
+    print len(jobs_final['output'])
+    #print type(jobs_final['output'])
 
-    path_startup(ANGEL_API_OBJECT, jobs_final, stats_output)
+
+    print len(jobs_final['output'][(len(jobs_final['output'])/2):])
+    print "^^^^^________^^^^"
+    print len(jobs_final['output'][:(len(jobs_final['output'])/2)])
+    #print len(dict(jobs_final.items()[len(jobs_final)/2:]))
+
+    #sys.exit(3)
+    #parallelization['1'] = dict(jobs_final.items()[:len(jobs_final)/2])
+    #print "^^^^^________^^^^"
+    #print parallelization['1']
+    #print "+-----+-----+"
+    #print parallelization['0']
+
+
+    parallelization['output'] = jobs_final['output'][(len(jobs_final['output'])/2):]
+    spilt.append(parallelization)
+    #print type(spilt[0])
+    #sys.exit(3)
+    parallelization = {}
+    parallelization['output'] = jobs_final['output'][:(len(jobs_final['output'])/2)]
+    spilt.append(parallelization)
+
+    '''
+    for x in spilt:
+        print x
+        print "+-----+-----+"
+    sys.exit(3)
+    '''
+    pool = Pool(multiprocessing.cpu_count())
+    #results = [pool.apply(path_startup,args=(ANGEL_API_OBJECT, x, stats_output)) for x in parallelization.values()]
+    results = [pool.apply(path_startup,args=(ANGEL_API_OBJECT, x, stats_output)) for x in spilt]
+    JAREN = results[0] + results[1]
     pprint("time after path and algo value was calculated %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime())))
+
+    top_ten(JAREN)
+    pprint("time after top ten was calculated %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime())))
+    #sys.exit(3)
+    #parallelization['1'] = dict(jobs_final.items()[:len(jobs_final)/2])
+    #num_cores = multiprocessing.cpu_count()
+    #results = Parallel(n_jobs=num_cores)(delayed(path_startup)(ANGEL_API_OBJECT,i,stats_output) for i in parallelization.values())
+    #print results
+
+    #print path_startup(ANGEL_API_OBJECT, parallelization['0'], stats_output)
+    #pprint("time after path and algo value was calculated %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime())))
 
 
 
